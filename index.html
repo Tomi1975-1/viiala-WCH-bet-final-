@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Cup 2026 — Office Bet</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#f5c518;--gold-dim:#c9a010;--silver:#c0c0c0;--bronze:#cd7f32;
+  --bg:#0d1f12;--surface:#132a1a;--surface2:#1c3824;
+  --text:#e8f5ec;--muted:#7aab87;--border:#2a4d33;
+  --red:#e05252;--green:#22883f;
+}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.header{background:var(--surface);border-bottom:2px solid var(--gold);padding:18px 24px;display:flex;align-items:center;gap:16px;}
+.header-trophy{font-size:2rem;}
+.header-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.6rem;letter-spacing:.04em;color:var(--gold);text-transform:uppercase;}
+.header-sub{font-size:.8rem;color:var(--muted);margin-top:2px;}
+.sync-dot{width:9px;height:9px;border-radius:50%;background:#888;margin-left:auto;flex-shrink:0;transition:background .3s;}
+.sync-dot.live{background:#4caf50;box-shadow:0 0 6px #4caf5088;}
+.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite;}
+.sync-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;gap:4px;}
+.tab{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;padding:12px 20px;border:none;background:none;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.main{padding:24px;max-width:900px;margin:0 auto;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px;margin-bottom:20px;}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.2rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:18px;}
+label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;color:var(--text);font-family:'Barlow',sans-serif;font-size:1rem;outline:none;transition:border-color .15s;}
+input[type=text]:focus{border-color:var(--gold);}
+.btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;padding:10px 24px;border-radius:6px;border:none;cursor:pointer;transition:all .15s;}
+.btn-primary{background:var(--gold);color:#111;}
+.btn-primary:hover{background:var(--gold-dim);}
+.btn-danger{background:var(--red);color:#fff;font-size:.8rem;padding:6px 14px;}
+.btn-sm{padding:7px 16px;font-size:.85rem;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.form-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;}
+.form-group{flex:1;min-width:180px;}
+.rank-slots{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+.rank-slot{display:flex;align-items:center;gap:14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;}
+.rank-badge{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.4rem;width:36px;text-align:center;flex-shrink:0;}
+.rank-1 .rank-badge{color:var(--gold);}
+.rank-2 .rank-badge{color:var(--silver);}
+.rank-3 .rank-badge{color:var(--bronze);}
+.rank-4 .rank-badge{color:var(--muted);}
+.rank-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.team-search{position:relative;flex:1;}
+.team-search input{width:100%;}
+.dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:6px;margin-top:4px;max-height:220px;overflow-y:auto;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.dropdown-item{padding:9px 14px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;gap:8px;}
+.dropdown-item:hover{background:var(--border);}
+.leaderboard-table{width:100%;border-collapse:collapse;}
+.leaderboard-table th{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);}
+.leaderboard-table td{padding:12px;border-bottom:1px solid var(--border);font-size:.95rem;vertical-align:top;}
+.leaderboard-table tr:last-child td{border-bottom:none;}
+.leaderboard-table tr:hover td{background:rgba(255,255,255,.03);}
+.pos-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;color:var(--muted);}
+.pos-1{color:var(--gold);}.pos-2{color:var(--silver);}.pos-3{color:var(--bronze);}
+.score-big{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.4rem;color:var(--gold);}
+.score-breakdown{font-size:.72rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.picks-inline{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;}
+.pick-chip{font-size:.73rem;padding:2px 8px;border-radius:100px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;gap:4px;}
+.pick-pos{color:var(--muted);font-size:.65rem;}
+.chip-correct-pos{border-color:var(--gold);color:var(--gold);}
+.chip-correct-team{border-color:var(--green);color:#6fcf8a;}
+.chip-wrong{opacity:.38;}
+.info-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:20px;font-size:.88rem;color:var(--muted);line-height:1.7;}
+.info-box b{color:var(--text);}
+.setup-box{background:rgba(245,197,24,.07);border:1px solid var(--gold-dim);border-radius:8px;padding:20px;margin-bottom:20px;}
+.setup-box h3{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:10px;}
+.setup-box p{font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:8px;}
+.setup-box input{margin-bottom:8px;}
+.result-controls{display:flex;flex-direction:column;gap:12px;}
+.result-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.empty-state{text-align:center;padding:48px;color:var(--muted);}
+select{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.95rem;outline:none;cursor:pointer;}
+select:focus{border-color:var(--gold);}
+.alert{padding:10px 16px;border-radius:6px;font-size:.9rem;margin-top:12px;}
+.alert-error{background:rgba(224,82,82,.15);border:1px solid var(--red);color:#f08080;}
+.alert-success{background:rgba(34,136,63,.15);border:1px solid var(--green);color:#6fcf8a;}
+.alert-info{background:rgba(245,197,24,.1);border:1px solid var(--gold-dim);color:var(--gold);}
+.admin-lock{display:flex;align-items:center;gap:10px;background:rgba(245,197,24,.07);border:1px solid var(--gold-dim);border-radius:8px;padding:14px 18px;margin-bottom:20px;}
+.section-sub{font-size:.82rem;color:var(--muted);margin-bottom:16px;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(245,197,24,.3);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-overlay{position:fixed;inset:0;background:rgba(13,31,18,.9);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px;}
+.loading-text{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;color:var(--gold);letter-spacing:.05em;}
+.last-updated{font-size:.72rem;color:var(--muted);text-align:right;margin-top:8px;}
+.retry-banner{background:rgba(224,82,82,.12);border:1px solid var(--red);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:#f08080;display:none;}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div style="font-size:2.5rem">⚽</div>
+  <div class="loading-text"><span class="spinner"></span>Loading picks…</div>
+</div>
+
+<div class="header">
+  <div class="header-trophy">🏆</div>
+  <div>
+    <div class="header-title">World Cup 2026 — Office Bet</div>
+    <div class="header-sub">Pick your top 4 · Score points · Win bragging rights</div>
+  </div>
+  <div id="sync-dot" class="sync-dot" title="Sync status"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('register')">My Picks</button>
+  <button class="tab" onclick="showTab('leaderboard')">Leaderboard</button>
+  <button class="tab" onclick="showTab('results')">Set Results</button>
+  <button class="tab" onclick="showTab('setup')">⚙ Setup</button>
+</div>
+
+<div class="main">
+
+  <!-- SETUP TAB -->
+  <div id="tab-setup" style="display:none">
+    <div class="setup-box">
+      <h3>One-time setup (admin only)</h3>
+      <p>This app uses <b>JSONBin.io</b> as a free shared database so everyone's picks sync in real time. You only need to do this once.</p>
+      <p><b>Step 1:</b> Go to <a href="https://jsonbin.io" target="_blank" style="color:var(--gold)">jsonbin.io</a> → Sign up free → Click <b>"+ New Bin"</b> → paste <code style="color:var(--gold)">{}</code> as content → click <b>Create Bin</b>.</p>
+      <p><b>Step 2:</b> Copy the <b>BIN ID</b> from the URL (looks like <code style="color:var(--gold)">64abc123ef456</code>) and your <b>API Key</b> from the Access Keys page. Paste them below and click Save.</p>
+      <label>JSONBin BIN ID</label>
+      <input type="text" id="cfg-bin" placeholder="e.g. 64abc123ef456..." />
+      <label>JSONBin API Key</label>
+      <input type="text" id="cfg-key" placeholder="e.g. $2b$10$..." />
+      <br>
+      <button class="btn btn-primary" onclick="saveConfig()" style="margin-top:8px">Save & Connect</button>
+      <div id="setup-alert"></div>
+    </div>
+    <div class="card" style="font-size:.85rem;color:var(--muted);line-height:1.7;">
+      <div class="card-title">About data & privacy</div>
+      All picks are stored in your own private JSONBin — nobody else can access it without your API key. The key is saved in each person's browser localStorage and never sent anywhere except JSONBin.
+    </div>
+  </div>
+
+  <!-- MY PICKS TAB -->
+  <div id="tab-register">
+    <div id="no-config-banner" class="retry-banner" style="display:none">
+      ⚠️ Database not configured yet. Go to the <b>⚙ Setup</b> tab first (admin needs to do this once and share the BIN ID + API Key with the team).
+    </div>
+    <div class="info-box">
+      <b>How to score:</b> Pick the top 4 finishers in order.<br>
+      🟡 <b>+1 pt</b> if that team finishes anywhere in the top 4 &nbsp;|&nbsp;
+      🟢 <b>+5 pts</b> if you nailed their exact position &nbsp;|&nbsp;
+      🏆 <b>+10 pts</b> if your 1st place pick wins the whole tournament
+    </div>
+    <div class="card">
+      <div class="card-title">Enter your picks</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your name</label>
+          <input type="text" id="name-input" placeholder="e.g. Erik Thorvaldsen" />
+        </div>
+      </div>
+      <div class="card-title" style="font-size:.95rem;margin-bottom:12px;">Your predicted top 4 finishers</div>
+      <div class="rank-slots" id="rank-slots"></div>
+      <div id="register-alert"></div>
+      <button class="btn btn-primary" id="save-btn" onclick="submitPicks()">Save my picks</button>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD TAB -->
+  <div id="tab-leaderboard" style="display:none">
+    <div class="card">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Leaderboard</span>
+        <button class="btn btn-sm btn-primary" onclick="loadRemote().then(renderLeaderboard)">↻ Refresh</button>
+      </div>
+      <div id="leaderboard-content"><div class="empty-state">Loading…</div></div>
+      <div class="last-updated" id="last-updated"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS TAB -->
+  <div id="tab-results" style="display:none">
+    <div class="admin-lock">🔒 <span style="color:var(--text);font-size:.9rem">Admin only — enter actual results after the tournament to calculate scores.</span></div>
+    <div class="card">
+      <div class="card-title">Set official results</div>
+      <p class="section-sub">Select the actual 1st–4th place finishers.</p>
+      <div class="result-controls" id="result-controls"></div>
+      <br>
+      <button class="btn btn-primary" onclick="saveResults()">Save results &amp; recalculate</button>
+      <div id="results-alert"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ─── ALL 48 OFFICIAL 2026 WORLD CUP TEAMS ─────────────────────────────────
+const TEAMS = [
+  {n:"Algeria",f:"🇩🇿",c:"CAF"},{n:"Argentina",f:"🇦🇷",c:"CONMEBOL"},{n:"Australia",f:"🇦🇺",c:"AFC"},
+  {n:"Austria",f:"🇦🇹",c:"UEFA"},{n:"Belgium",f:"🇧🇪",c:"UEFA"},{n:"Bosnia & Herzegovina",f:"🇧🇦",c:"UEFA"},
+  {n:"Brazil",f:"🇧🇷",c:"CONMEBOL"},{n:"Canada",f:"🇨🇦",c:"CONCACAF"},{n:"Cape Verde",f:"🇨🇻",c:"CAF"},
+  {n:"Colombia",f:"🇨🇴",c:"CONMEBOL"},{n:"Croatia",f:"🇭🇷",c:"UEFA"},{n:"Curaçao",f:"🇨🇼",c:"CONCACAF"},
+  {n:"Czechia",f:"🇨🇿",c:"UEFA"},{n:"DR Congo",f:"🇨🇩",c:"CAF"},{n:"Ecuador",f:"🇪🇨",c:"CONMEBOL"},
+  {n:"Egypt",f:"🇪🇬",c:"CAF"},{n:"England",f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",c:"UEFA"},{n:"France",f:"🇫🇷",c:"UEFA"},
+  {n:"Germany",f:"🇩🇪",c:"UEFA"},{n:"Ghana",f:"🇬🇭",c:"CAF"},{n:"Haiti",f:"🇭🇹",c:"CONCACAF"},
+  {n:"Iran",f:"🇮🇷",c:"AFC"},{n:"Iraq",f:"🇮🇶",c:"AFC"},{n:"Ivory Coast",f:"🇨🇮",c:"CAF"},
+  {n:"Japan",f:"🇯🇵",c:"AFC"},{n:"Jordan",f:"🇯🇴",c:"AFC"},{n:"Mexico",f:"🇲🇽",c:"CONCACAF"},
+  {n:"Morocco",f:"🇲🇦",c:"CAF"},{n:"Netherlands",f:"🇳🇱",c:"UEFA"},{n:"New Zealand",f:"🇳🇿",c:"OFC"},
+  {n:"Norway",f:"🇳🇴",c:"UEFA"},{n:"Panama",f:"🇵🇦",c:"CONCACAF"},{n:"Paraguay",f:"🇵🇾",c:"CONMEBOL"},
+  {n:"Portugal",f:"🇵🇹",c:"UEFA"},{n:"Qatar",f:"🇶🇦",c:"AFC"},{n:"Saudi Arabia",f:"🇸🇦",c:"AFC"},
+  {n:"Scotland",f:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",c:"UEFA"},{n:"Senegal",f:"🇸🇳",c:"CAF"},{n:"South Africa",f:"🇿🇦",c:"CAF"},
+  {n:"South Korea",f:"🇰🇷",c:"AFC"},{n:"Spain",f:"🇪🇸",c:"UEFA"},{n:"Sweden",f:"🇸🇪",c:"UEFA"},
+  {n:"Switzerland",f:"🇨🇭",c:"UEFA"},{n:"Tunisia",f:"🇹🇳",c:"CAF"},{n:"Turkey",f:"🇹🇷",c:"UEFA"},
+  {n:"Uruguay",f:"🇺🇾",c:"CONMEBOL"},{n:"USA",f:"🇺🇸",c:"CONCACAF"},{n:"Uzbekistan",f:"🇺🇿",c:"AFC"}
+];
+
+const ICONS=["🥇","🥈","🥉","4️⃣"];
+const LABELS=["1st Place","2nd Place","3rd Place","4th Place"];
+const BIN_BASE="https://api.jsonbin.io/v3/b";
+
+// ─── CONFIG (stored in localStorage per user) ─────────────────────────────
+function getConfig(){
+  return{
+    binId:localStorage.getItem('wc_bin')||'',
+    apiKey:localStorage.getItem('wc_key')||''
+  };
+}
+function saveConfig(){
+  const binId=document.getElementById('cfg-bin').value.trim();
+  const apiKey=document.getElementById('cfg-key').value.trim();
+  const alertEl=document.getElementById('setup-alert');
+  if(!binId||!apiKey){showAlert(alertEl,'error','Please fill in both fields.');return;}
+  localStorage.setItem('wc_bin',binId);
+  localStorage.setItem('wc_key',apiKey);
+  showAlert(alertEl,'success','✅ Connected! You can now use the app.');
+  checkConfig();
+  loadRemote().then(()=>{renderLeaderboard();renderResults();});
+}
+
+function checkConfig(){
+  const{binId,apiKey}=getConfig();
+  const banner=document.getElementById('no-config-banner');
+  if(!binId||!apiKey){
+    if(banner) banner.style.display='block';
+    return false;
+  }
+  if(banner) banner.style.display='none';
+  // Pre-fill setup fields
+  const bi=document.getElementById('cfg-bin');
+  const ki=document.getElementById('cfg-key');
+  if(bi&&!bi.value) bi.value=binId;
+  if(ki&&!ki.value) ki.value=apiKey;
+  return true;
+}
+
+// ─── REMOTE DB (JSONBin) ───────────────────────────────────────────────────
+let remoteState={picks:{},results:[null,null,null,null],lastUpdated:null};
+
+async function loadRemote(){
+  const{binId,apiKey}=getConfig();
+  if(!binId||!apiKey){setSyncStatus('error');return;}
+  setSyncStatus('syncing');
+  try{
+    const r=await fetch(`${BIN_BASE}/${binId}/latest`,{
+      headers:{'X-Master-Key':apiKey,'X-Bin-Meta':false}
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    // JSONBin wraps in {record:...} but with X-Bin-Meta:false it's direct
+    if(data && typeof data==='object'){
+      if(data.picks) remoteState=data;
+      else remoteState={picks:{},results:[null,null,null,null],lastUpdated:null};
+    }
+    setSyncStatus('live');
+    updateLastUpdated();
+  }catch(e){
+    console.warn('Load error',e);
+    setSyncStatus('error');
+  }
+}
+
+async function saveRemote(state){
+  const{binId,apiKey}=getConfig();
+  if(!binId||!apiKey) throw new Error('Not configured');
+  setSyncStatus('syncing');
+  const r=await fetch(`${BIN_BASE}/${binId}`,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json','X-Master-Key':apiKey,'X-Bin-Meta':false},
+    body:JSON.stringify(state)
+  });
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  setSyncStatus('live');
+  updateLastUpdated();
+}
+
+// ─── SYNC STATUS ──────────────────────────────────────────────────────────
+function setSyncStatus(s){
+  const d=document.getElementById('sync-dot');
+  if(!d) return;
+  d.className='sync-dot '+s;
+  d.title=s==='live'?'Live — synced':s==='syncing'?'Syncing…':'Sync error — check Setup tab';
+}
+function updateLastUpdated(){
+  const el=document.getElementById('last-updated');
+  if(!el) return;
+  if(remoteState.lastUpdated){
+    el.textContent='Last updated: '+new Date(remoteState.lastUpdated).toLocaleTimeString();
+  }
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────
+function showTab(t){
+  ['register','leaderboard','results','setup'].forEach(id=>{
+    document.getElementById('tab-'+id).style.display=id===t?'':'none';
+  });
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',['register','leaderboard','results','setup'][i]===t);
+  });
+  if(t==='leaderboard') loadRemote().then(renderLeaderboard);
+  if(t==='results') renderResults();
+  if(t==='register') checkConfig();
+}
+
+// ─── RANK SLOTS ───────────────────────────────────────────────────────────
+let myPicks=[null,null,null,null];
+let activeDD=null;
+
+function renderRankSlots(){
+  const c=document.getElementById('rank-slots');
+  c.innerHTML='';
+  [0,1,2,3].forEach(i=>{
+    const div=document.createElement('div');
+    div.className='rank-slot rank-'+(i+1);
+    div.innerHTML=`
+      <div class="rank-badge">${ICONS[i]}</div>
+      <div style="flex:1">
+        <div class="rank-label">${LABELS[i]}</div>
+        <div class="team-search" id="sw-${i}">
+          <input type="text" id="si-${i}" placeholder="Type to search all 48 teams…"
+            value="${myPicks[i]?myPicks[i].f+' '+myPicks[i].n:''}"
+            autocomplete="off"
+            oninput="onSearch(${i},this.value)"
+            onfocus="openDD(${i})"
+          />
+          <div class="dropdown" id="dd-${i}" style="display:none"></div>
+        </div>
+      </div>
+      ${myPicks[i]?`<button class="btn btn-danger" onclick="clearPick(${i})">✕</button>`:''}
+    `;
+    c.appendChild(div);
+  });
+}
+
+function onSearch(i,val){
+  // If a team was selected, clear it first
+  if(myPicks[i]) myPicks[i]=null;
+  openDD(i,val);
+}
+
+function openDD(i, forceVal){
+  [0,1,2,3].forEach(j=>{
+    if(j!==i){const d=document.getElementById('dd-'+j);if(d)d.style.display='none';}
+  });
+  activeDD=i;
+  const raw=(forceVal!==undefined?forceVal:(document.getElementById('si-'+i).value||'')).toLowerCase().trim();
+  const used=myPicks.map((p,j)=>j!==i?p:null).filter(Boolean);
+  const list=TEAMS.filter(t=>
+    !used.find(u=>u.n===t.n) &&
+    (!raw || t.n.toLowerCase().includes(raw) || t.c.toLowerCase().includes(raw))
+  );
+  const dd=document.getElementById('dd-'+i);
+  if(!list.length){dd.style.display='none';return;}
+  dd.innerHTML=list.map(t=>`
+    <div class="dropdown-item" onmousedown="selectTeam(${i},'${t.n.replace(/'/g,"\\'")}')">
+      <span>${t.f}</span> ${t.n}
+      <span style="font-size:.7rem;color:var(--muted);margin-left:auto">${t.c}</span>
+    </div>`).join('');
+  dd.style.display='block';
+}
+
+function selectTeam(i,name){
+  myPicks[i]=TEAMS.find(t=>t.n===name);
+  const dd=document.getElementById('dd-'+i);
+  if(dd) dd.style.display='none';
+  renderRankSlots();
+}
+function clearPick(i){myPicks[i]=null;renderRankSlots();}
+
+document.addEventListener('click',e=>{
+  if(activeDD!==null){
+    const w=document.getElementById('sw-'+activeDD);
+    if(w&&!w.contains(e.target)){
+      const d=document.getElementById('dd-'+activeDD);
+      if(d) d.style.display='none';
+      activeDD=null;
+    }
+  }
+});
+
+// ─── SUBMIT — read-then-write to avoid overwriting others ─────────────────
+async function submitPicks(){
+  const name=document.getElementById('name-input').value.trim();
+  const alertEl=document.getElementById('register-alert');
+  if(!checkConfig()){showAlert(alertEl,'error','⚠️ Please complete Setup first.');return;}
+  if(!name){showAlert(alertEl,'error','Please enter your name.');return;}
+  if(myPicks.some(p=>!p)){showAlert(alertEl,'error','Please select all 4 teams.');return;}
+
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>Saving…';
+
+  try{
+    // 1. Fresh read from server
+    await loadRemote();
+    // 2. Merge only this person's picks into the latest state
+    const key=name.toLowerCase().replace(/\s+/g,'_');
+    remoteState.picks[key]={name,picks:myPicks.map(p=>p.n),ts:Date.now()};
+    remoteState.lastUpdated=Date.now();
+    // 3. Write back
+    await saveRemote(remoteState);
+    showAlert(alertEl,'success','✅ Picks saved for '+name+'! Check the Leaderboard.');
+  }catch(e){
+    console.error(e);
+    showAlert(alertEl,'error','❌ Could not save: '+e.message+'. Check Setup tab.');
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='Save my picks';
+  }
+}
+
+// ─── LEADERBOARD ──────────────────────────────────────────────────────────
+function calcScore(picks){
+  const res=remoteState.results;
+  if(!res||res.every(r=>!r)) return{total:null,bd:[]};
+  let total=0,bd=[];
+  picks.forEach((p,i)=>{
+    let pts=0,rs=[];
+    const ri=res.findIndex(r=>r===p);
+    if(ri!==-1){
+      pts+=1;rs.push('+1');
+      if(ri===i){pts+=5;rs.push('+5 exact');}
+      if(i===0&&ri===0){pts+=10;rs.push('+10 🏆');}
+    }
+    total+=pts;bd.push({p,pts,rs,ri});
+  });
+  return{total,bd};
+}
+
+function renderLeaderboard(){
+  const el=document.getElementById('leaderboard-content');
+  const entries=Object.values(remoteState.picks||{});
+  if(!entries.length){el.innerHTML='<div class="empty-state">No picks yet — be the first! ⚽</div>';return;}
+  const hasR=remoteState.results&&remoteState.results.some(r=>r);
+  const scored=entries
+    .map(e=>{const{total,bd}=calcScore(e.picks);return{...e,total,bd};})
+    .sort((a,b)=>hasR?(b.total||0)-(a.total||0):a.name.localeCompare(b.name));
+
+  el.innerHTML=`<table class="leaderboard-table">
+    <thead><tr>
+      <th>${hasR?'#':'—'}</th><th>Name</th><th>Picks</th>${hasR?'<th>Score</th>':''}
+    </tr></thead>
+    <tbody>${scored.map((e,idx)=>{
+      const pos=idx+1;
+      const pc=hasR&&pos<=3?` pos-${pos}`:'';
+      const chips=e.picks.map((p,i)=>{
+        const t=TEAMS.find(x=>x.n===p)||{f:'🏳️'};
+        let cc='';
+        if(hasR){
+          const ri=remoteState.results.findIndex(r=>r===p);
+          if(ri===i) cc='chip-correct-pos';
+          else if(ri!==-1) cc='chip-correct-team';
+          else cc='chip-wrong';
+        }
+        return`<span class="pick-chip ${cc}"><span class="pick-pos">${ICONS[i]}</span> ${t.f} ${p}</span>`;
+      }).join('');
+      const summary=e.bd?e.bd.filter(b=>b.pts>0).map(b=>b.rs.join(' ')).join(' · '):'';
+      return`<tr>
+        <td><span class="pos-num${pc}">${hasR?pos:'—'}</span></td>
+        <td style="font-weight:600">${e.name}</td>
+        <td><div class="picks-inline">${chips}</div></td>
+        ${hasR?`<td><div class="score-big">${e.total??'—'}</div>${summary?`<div class="score-breakdown">${summary}</div>`:''}</td>`:''}
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+  updateLastUpdated();
+}
+
+// ─── RESULTS ──────────────────────────────────────────────────────────────
+function renderResults(){
+  const c=document.getElementById('result-controls');
+  if(!c) return;
+  c.innerHTML=[0,1,2,3].map(i=>{
+    const val=(remoteState.results||[])[i]||'';
+    const team=val?TEAMS.find(t=>t.n===val):null;
+    return`<div class="result-row">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--gold);min-width:100px">${ICONS[i]} ${LABELS[i]}</span>
+      <select onchange="remoteState.results[${i}]=this.value||null">
+        <option value="">— Select —</option>
+        ${TEAMS.map(t=>`<option value="${t.n}"${t.n===val?' selected':''}>${t.f} ${t.n}</option>`).join('')}
+      </select>
+      ${team?`<span style="font-size:1.4rem">${team.f}</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function saveResults(){
+  const dupes=remoteState.results.filter(Boolean);
+  const alertEl=document.getElementById('results-alert');
+  if(new Set(dupes).size!==dupes.length){showAlert(alertEl,'error','Each team can only appear once.');return;}
+  try{
+    remoteState.lastUpdated=Date.now();
+    await saveRemote(remoteState);
+    showAlert(alertEl,'success','✅ Results saved! Scores are live on the Leaderboard.');
+  }catch(e){
+    showAlert(alertEl,'error','❌ Could not save: '+e.message);
+  }
+}
+
+function showAlert(el,type,msg){
+  el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(()=>{if(el) el.innerHTML='';},6000);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+(async()=>{
+  checkConfig();
+  const{binId,apiKey}=getConfig();
+  if(binId&&apiKey){
+    await loadRemote();
+  }else{
+    setSyncStatus('error');
+  }
+  document.getElementById('loading').style.display='none';
+  renderRankSlots();
+  renderResults();
+  // Auto-refresh every 30s
+  setInterval(async()=>{
+    if(getConfig().binId){
+      await loadRemote();
+      if(document.getElementById('tab-leaderboard').style.display!=='none') renderLeaderboard();
+    }
+  },30000);
+})();
+</script>
+</body>
+</html>
